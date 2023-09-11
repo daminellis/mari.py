@@ -1,22 +1,4 @@
-#exemplos de lambda
-
-#exemplo 1
-
-lista = [
-    lambda x : x**2,
-    lambda x : x**3,
-    lambda x : x**4,
-]
-
-for i in lista:
-    print(i(4))
-
-# i = lambda x : x**2, 
-# i = lambda x : x**2, 
-# i = lambda x : x**2, 
-
-=======================================================
-  """
+"""
 exemplos de lambda
 
 exemplo 1
@@ -102,27 +84,37 @@ frutas = ["maçã","banana","laranja"]
 comprimento_palavras = list(map(lambda x : len(x),frutas))
 print (comprimento_palavras)
 """
+"""
 #funcoes e procedimentos
 def convertf(tempc):
     tempf = (tempc * 9/5) + 32
     return tempf
 
 def convertk(tempc):
-    tempk = (tempc + 273)
+    tempk = tempc + 273
     return tempk
 
-def main ():
+tempc = float(input("Digite a temperatura em Celsius: "))
+def main():
     while True:
-        tempc = float(input("digite a temperaura em celcius :"))
-        perg = input(int('Digite 1 - Farenheit\n'
-                         'Digite 2 - Celcius\n'
-                         'Digite 3 - Sair'))
+        perg = input('Digite 1 - Fahrenheit\n'
+                     'Digite 2 - Kelvin\n'
+                     'Digite 3 - Reset\n'
+                     'Digite 4 - Sair\n')
 
-        if perg == 1:
-            tempk = convertk(tempc)
-            print (f'A temperatura {tempc} em kelvin é {tempk}')
-        elif perg == 2:
+        if perg == "1":
             tempf = convertf(tempc)
-            print (f'A temperatura {tempc} em farenheiht é {tempf}')
-        else:
+            print(f'A temperatura {tempc} em Fahrenheit é {tempf}')
+        elif perg == "2":
+            tempk = convertk(tempc)
+            print(f'A temperatura {tempc} em Kelvin é {tempk}')
+        elif perg == "3":
+            tempc = float(input("Digite a nova temperatura em Celsius: "))
+        elif perg == "4":
             break
+        else:
+            print("Opção inválida. Por favor, escolha 1, 2, 3 ou 4.")
+
+if __name__ == "__main__":
+    main()
+"""
