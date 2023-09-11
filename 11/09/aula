@@ -1,1 +1,128 @@
+#exemplos de lambda
 
+#exemplo 1
+
+lista = [
+    lambda x : x**2,
+    lambda x : x**3,
+    lambda x : x**4,
+]
+
+for i in lista:
+    print(i(4))
+
+# i = lambda x : x**2, 
+# i = lambda x : x**2, 
+# i = lambda x : x**2, 
+
+=======================================================
+  """
+exemplos de lambda
+
+exemplo 1
+
+lista = [
+    lambda x : x**2,
+    lambda x : x**3,
+    lambda x : x**4,
+]
+
+for i in lista:
+    print(i(4))
+
+i = lambda x : x**2, 
+i = lambda x : x**2, 
+i = lambda x : x**2, 
+"""
+""""
+#exemplo2
+def fun_lmb():
+    num = float(input('Digite um número: ')) 
+    lambdas = [
+        lambda x: x ** 2,
+        lambda x: x ** 3,
+        lambda x: x ** 4,
+    ]
+    
+    for lmb in lambdas:
+        resultado = lmb(num)
+        print(f"Resultado: {resultado}")
+
+fun_lmb()
+"""
+"""
+print((lambda a,b: a + b) (8,4))
+"""
+
+"""
+#lambda com string
+nome_idade = lambda nome,idade : print(f'{nome} possui {idade} anos')
+
+nome = input('digite seu nome :')
+idade = int(input('digite sua idade :'))
+
+nome_idade(nome,idade)
+"""
+"""
+#exercicio 3 com func filter 
+n = [1, 2, 3, 4, 5, 7, 8, 9, 10, 12]
+# Filtrar os números pares
+pares = list(filter(lambda x: x % 2 == 0, n))
+# Imprimir a lista de números pares
+print(pares)
+"""
+"""
+#exercicio 4
+
+lista_de_nomes = ["Augusto", "joao", "charles", "devid", "edu", "fisico", "Arthur"]
+lista_de_nomes = [nome.lower() for nome in lista_de_nomes]
+
+filtros = filter(lambda nome: 'a' in nome, lista_de_nomes)
+filtros = list(filtros)
+print(filtros)
+"""
+"""
+#exemplo 1 map
+
+numeros = [1, 2, 3, 4, 5]
+quadrados = list(map(lambda x : x**2, numeros))
+print(quadrados)
+"""
+
+"""
+#exemplo 2
+palavras = ["python", "é", "muito", "divertido"]
+palavra_maiusculas = list(map(lambda x : x.upper(),palavras))
+print (palavra_maiusculas)
+"""
+"""
+#exemplo 3
+
+frutas = ["maçã","banana","laranja"]
+comprimento_palavras = list(map(lambda x : len(x),frutas))
+print (comprimento_palavras)
+"""
+#funcoes e procedimentos
+def convertf(tempc):
+    tempf = (tempc * 9/5) + 32
+    return tempf
+
+def convertk(tempc):
+    tempk = (tempc + 273)
+    return tempk
+
+def main ():
+    while True:
+        tempc = float(input("digite a temperaura em celcius :"))
+        perg = input(int('Digite 1 - Farenheit\n'
+                         'Digite 2 - Celcius\n'
+                         'Digite 3 - Sair'))
+
+        if perg == 1:
+            tempk = convertk(tempc)
+            print (f'A temperatura {tempc} em kelvin é {tempk}')
+        elif perg == 2:
+            tempf = convertf(tempc)
+            print (f'A temperatura {tempc} em farenheiht é {tempf}')
+        else:
+            break
