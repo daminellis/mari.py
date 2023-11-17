@@ -1,0 +1,116 @@
+import mysql.connector
+from tkinter import messagebox, Tk, Label, Entry, Button, Toplevel
+
+# Conectar ao banco de dados MySQL
+conexao = mysql.connector.connect(
+    host="127.0.0.1",
+    user="root",
+    password="",
+    database="final_py"
+)
+
+# Criar o cursor
+cursor = conexao.cursor()
+
+# Função para autenticar o usuário
+def fazer_login():
+    cpf_digitado = int(cpf_entry.get())
+    senha_digitada = senha_entry.get()
+
+    # Consultar o banco de dados para verificar o login
+    cursor.execute("SELECT * FROM cadastro WHERE cpf = %s AND senha = %s", (cpf_digitado, senha_digitada))
+    usuario = cursor.fetchone()
+
+    if usuario:
+        exibir_dados_cadastrais(usuario)
+    else:
+        messagebox.showerror("Erro de Login", "CPF ou senha incorretos.")
+
+# Função para exibir os dados cadastrais em uma nova janela
+def exibir_dados_cadastrais(usuario):
+    nova_janela = Toplevel(janela)
+    nova_janela.title("Dados Cadastrais")
+
+    # Exibir os dados cadastrais
+    dados_label = Label(nova_janela, text=f"Dados Cadastrais\nCPF: {usuario[0]}\nNome: {usuario[2]}\nIdade: {usuario[3]}\nSalário: {usuario[4]}")
+    dados_label.pack(padx=10, pady=10)
+
+# Função para abrir a janela de cadastro
+def abrir_janela_cadastro():
+    janela_cadastro = Toplevel(janela)
+    janela_cadastro.title("Cadastro de Usuário")
+
+    # Criar campos de entrada
+    cpf_label = Label(janela_cadastro, text="CPF:")
+    cpf_label.grid(row=0, column=0, padx=10, pady=10)
+    cpf_entry_cadastro = Entry(janela_cadastro)
+    cpf_entry_cadastro.grid(row=0, column=1, padx=10, pady=10)
+
+    senha_label = Label(janela_cadastro, text="Senha:")
+    senha_label.grid(row=1, column=0, padx=10, pady=10)
+    senha_entry_cadastro = Entry(janela_cadastro, show="*")
+    senha_entry_cadastro.grid(row=1, column=1, padx=10, pady=10)
+
+    nome_label = Label(janela_cadastro, text="Nome:")
+    nome_label.grid(row=2, column=0, padx=10, pady=10)
+    nome_entry_cadastro = Entry(janela_cadastro)
+    nome_entry_cadastro.grid(row=2, column=1, padx=10, pady=10)
+
+    idade_label = Label(janela_cadastro, text="Idade:")
+    idade_label.grid(row=3, column=0, padx=10, pady=10)
+    idade_entry_cadastro = Entry(janela_cadastro)
+    idade_entry_cadastro.grid(row=3, column=1, padx=10, pady=10)
+
+    salario_label = Label(janela_cadastro, text="Salário:")
+    salario_label.grid(row=4, column=0, padx=10, pady=10)
+    salario_entry_cadastro = Entry(janela_cadastro)
+    salario_entry_cadastro.grid(row=4, column=1, padx=10, pady=10)
+
+    # Função para cadastrar usuário na nova janela
+    def cadastrar_usuario():
+        cpf_digitado = int(cpf_entry_cadastro.get())
+        senha_digitada = senha_entry_cadastro.get()
+        nome_digitado = nome_entry_cadastro.get()
+        idade_digitada = int(idade_entry_cadastro.get())
+        salario_digitado = float(salario_entry_cadastro.get())
+
+        # Inserir novo usuário no banco de dados
+        cursor.execute("INSERT INTO cadastro (cpf, senha, nome, idade, salario) VALUES (%s, %s, %s, %s, %s)", 
+                       (cpf_digitado, senha_digitada, nome_digitado, idade_digitada, salario_digitado))
+        conexao.commit()
+
+        messagebox.showinfo("Cadastro", "Usuário cadastrado com sucesso!")
+        janela_cadastro.destroy()
+
+    # Criar botão de cadastro na nova janela
+    cadastro_button_cadastro = Button(janela_cadastro, text="Cadastrar", command=cadastrar_usuario)
+    cadastro_button_cadastro.grid(row=5, column=0, columnspan=2, pady=10)
+
+# Criar a janela principal
+janela = Tk()
+janela.title("Login")
+
+# Criar campos de entrada para login
+cpf_label = Label(janela, text="CPF:")
+cpf_label.grid(row=0, column=0, padx=10, pady=10)
+cpf_entry = Entry(janela)
+cpf_entry.grid(row=0, column=1, padx=10, pady=10)
+
+senha_label = Label(janela, text="Senha:")
+senha_label.grid(row=1, column=0, padx=10, pady=10)
+senha_entry = Entry(janela, show="*")
+senha_entry.grid(row=1, column=1, padx=10, pady=10)
+
+# Criar botões de login e cadastro
+login_button = Button(janela, text="Login", command=fazer_login)
+login_button.grid(row=2, column=0, pady=10)
+
+cadastro_button = Button(janela, text="Cadastro", command=abrir_janela_cadastro)
+cadastro_button.grid(row=2, column=1, pady=10)
+
+# Iniciar o loop da interface gráfica
+janela.mainloop()
+
+# Fechar a conexão com o banco de dados ao fechar a janela
+conexao.close()
+--------------------------------------------------------------------
