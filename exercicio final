@@ -22,18 +22,57 @@ def fazer_login():
     usuario = cursor.fetchone()
 
     if usuario:
-        exibir_dados_cadastrais(usuario)
+        exibir_menu_principal(usuario)
     else:
         messagebox.showerror("Erro de Login", "CPF ou senha incorretos.")
 
-# Função para exibir os dados cadastrais em uma nova janela
-def exibir_dados_cadastrais(usuario):
-    nova_janela = Toplevel(janela)
-    nova_janela.title("Dados Cadastrais")
+# Função para exibir o menu principal após o login
+def exibir_menu_principal(usuario):
+    janela_menu = Toplevel(janela)
+    janela_menu.title("Menu Principal")
 
-    # Exibir os dados cadastrais
-    dados_label = Label(nova_janela, text=f"Dados Cadastrais\nCPF: {usuario[0]}\nNome: {usuario[2]}\nIdade: {usuario[3]}\nSalário: {usuario[4]}")
-    dados_label.pack(padx=10, pady=10)
+    # Botão para adicionar gasto
+    adicionar_gasto_button = Button(janela_menu, text="Adicionar Gasto", command=lambda: abrir_janela_adicionar_gasto(usuario))
+    adicionar_gasto_button.pack(pady=10)
+
+# Função para abrir a janela de adicionar gasto
+def abrir_janela_adicionar_gasto(usuario):
+    janela_adicionar_gasto = Toplevel(janela)
+    janela_adicionar_gasto.title("Adicionar Gasto")
+
+    # Criar campos de entrada
+    nome_label = Label(janela_adicionar_gasto, text="Nome:")
+    nome_label.grid(row=0, column=0, padx=10, pady=10)
+    nome_entry = Entry(janela_adicionar_gasto)
+    nome_entry.grid(row=0, column=1, padx=10, pady=10)
+
+    valor_label = Label(janela_adicionar_gasto, text="Valor:")
+    valor_label.grid(row=1, column=0, padx=10, pady=10)
+    valor_entry = Entry(janela_adicionar_gasto)
+    valor_entry.grid(row=1, column=1, padx=10, pady=10)
+
+    observacao_label = Label(janela_adicionar_gasto, text="Observação:")
+    observacao_label.grid(row=2, column=0, padx=10, pady=10)
+    observacao_entry = Entry(janela_adicionar_gasto)
+    observacao_entry.grid(row=2, column=1, padx=10, pady=10)
+
+    # Função para adicionar gasto à lista do usuário
+    def adicionar_gasto():
+        nome_gasto = nome_entry.get()
+        valor_gasto = float(valor_entry.get())
+        observacao_gasto = observacao_entry.get()
+
+        # Inserir novo gasto no banco de dados associado ao usuário
+        cursor.execute("INSERT INTO gastos (nome, valor, observacao, cpf_cadastro) VALUES (%s, %s, %s, %s)",
+                       (nome_gasto, valor_gasto, observacao_gasto, usuario[0]))
+        conexao.commit()
+
+        messagebox.showinfo("Gasto Adicionado", "Gasto adicionado com sucesso!")
+        janela_adicionar_gasto.destroy()
+
+    # Criar botão para adicionar gasto
+    adicionar_gasto_button = Button(janela_adicionar_gasto, text="Adicionar Gasto", command=adicionar_gasto)
+    adicionar_gasto_button.grid(row=3, column=0, columnspan=2, pady=10)
 
 # Função para abrir a janela de cadastro
 def abrir_janela_cadastro():
@@ -86,6 +125,75 @@ def abrir_janela_cadastro():
     cadastro_button_cadastro = Button(janela_cadastro, text="Cadastrar", command=cadastrar_usuario)
     cadastro_button_cadastro.grid(row=5, column=0, columnspan=2, pady=10)
 
+# Função para exibir o menu principal após o login
+def exibir_menu_principal(usuario):
+    janela_menu = Toplevel(janela)
+    janela_menu.title("Menu Principal")
+
+    # Botão para adicionar gasto
+    adicionar_gasto_button = Button(janela_menu, text="Adicionar Gasto", command=lambda: abrir_janela_adicionar_gasto(usuario))
+    adicionar_gasto_button.pack(pady=10)
+
+    # Botão para visualizar gastos
+    visualizar_gastos_button = Button(janela_menu, text="Visualizar Gastos", command=lambda: visualizar_gastos(usuario))
+    visualizar_gastos_button.pack(pady=10)
+
+    # Botão para excluir gastos
+    excluir_gastos_button = Button(janela_menu, text="Excluir Gastos", command=lambda: excluir_gastos(usuario))
+    excluir_gastos_button.pack(pady=10)
+
+# Função para visualizar gastos
+def visualizar_gastos(usuario):
+    # Criar a janela para visualizar gastos
+    janela_visualizar_gastos = Toplevel(janela)
+    janela_visualizar_gastos.title("Visualizar Gastos")
+
+    # Consultar gastos associados ao usuário
+    cursor.execute("SELECT * FROM gastos WHERE cpf_cadastro = %s", (usuario[0],))
+    gastos = cursor.fetchall()
+
+    # Exibir gastos na nova janela
+    for gasto in gastos:
+        label_gasto = Label(janela_visualizar_gastos, text=f"ID: {gasto[0]}, Nome: {gasto[1]}, Valor: {gasto[2]}, Observação: {gasto[3]}")
+        label_gasto.pack()
+
+# Função para excluir gastos
+def excluir_gastos(usuario):
+    # Criar a janela para excluir gastos
+    janela_excluir_gastos = Toplevel(janela)
+    janela_excluir_gastos.title("Excluir Gastos")
+
+    # Consultar gastos associados ao usuário
+    cursor.execute("SELECT * FROM gastos WHERE cpf_cadastro = %s", (usuario[0],))
+    gastos = cursor.fetchall()
+
+    # Exibir gastos na nova janela
+    for gasto in gastos:
+        label_gasto = Label(janela_excluir_gastos, text=f"ID: {gasto[0]}, Nome: {gasto[1]}, Valor: {gasto[2]}, Observação: {gasto[3]}")
+        label_gasto.pack()
+
+    # Criar campo de entrada para o ID do gasto a ser excluído
+    id_gasto_label = Label(janela_excluir_gastos, text="ID do Gasto a ser Excluído:")
+    id_gasto_label.pack(pady=10)
+    id_gasto_entry = Entry(janela_excluir_gastos)
+    id_gasto_entry.pack(pady=10)
+
+    # Função para excluir gasto pelo ID
+    def excluir_gasto():
+        id_gasto = int(id_gasto_entry.get())
+
+        # Excluir gasto no banco de dados
+        cursor.execute("DELETE FROM gastos WHERE id_gasto = %s", (id_gasto,))
+        conexao.commit()
+
+        messagebox.showinfo("Gasto Excluído", "Gasto excluído com sucesso!")
+        janela_excluir_gastos.destroy()
+
+    # Criar botão para excluir gasto
+    excluir_gasto_button = Button(janela_excluir_gastos, text="Excluir Gasto", command=excluir_gasto)
+    excluir_gasto_button.pack(pady=10)
+
+
 # Criar a janela principal
 janela = Tk()
 janela.title("Login")
@@ -113,4 +221,3 @@ janela.mainloop()
 
 # Fechar a conexão com o banco de dados ao fechar a janela
 conexao.close()
---------------------------------------------------------------------
