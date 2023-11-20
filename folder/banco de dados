@@ -1,0 +1,16 @@
+create table cadastro(
+cpf INT(15) NOT NULL,
+senha varchar(10) NOT NULL,	
+nome VARCHAR(45) NOT NULL,
+idade int(3) NOT NULL,
+salario float(10) NOT NULL,
+primary key(cpf));
+
+CREATE TABLE gastos(
+id_gasto INT NOT NULL AUTO_INCREMENT,
+nome VARCHAR(45) NOT NULL,
+valor INT NOT NULL,
+observacao VARCHAR(45) NOT NULL,
+cpf_cadastro INT NOT NULL,
+primary key(id_gasto),
+foreign key (cpf_cadastro) references cadastro(cpf));
