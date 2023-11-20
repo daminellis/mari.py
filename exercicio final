@@ -3,10 +3,10 @@ from tkinter import messagebox, Tk, Label, Entry, Button, Toplevel
 
 # Conectar ao banco de dados MySQL
 conexao = mysql.connector.connect(
-    host="127.0.0.1",
+    host="localhost",
     user="root",
-    password="",
-    database="final_py"
+    password="1234",
+    database="exerfinal"
 )
 
 # Criar o cursor
@@ -138,6 +138,10 @@ def exibir_menu_principal(usuario):
     visualizar_gastos_button = Button(janela_menu, text="Visualizar Gastos", command=lambda: visualizar_gastos(usuario))
     visualizar_gastos_button.pack(pady=10)
 
+    # Botão para alterar gasto
+    alterar_gasto_button = Button(janela_menu, text="Alterar Gasto", command=lambda: abrir_janela_alterar_gasto(usuario))
+    alterar_gasto_button.pack(pady=10)
+
     # Botão para excluir gastos
     excluir_gastos_button = Button(janela_menu, text="Excluir Gastos", command=lambda: excluir_gastos(usuario))
     excluir_gastos_button.pack(pady=10)
@@ -157,15 +161,98 @@ def visualizar_gastos(usuario):
         label_gasto = Label(janela_visualizar_gastos, text=f"ID: {gasto[0]}, Nome: {gasto[1]}, Valor: {gasto[2]}, Observação: {gasto[3]}")
         label_gasto.pack()
 
-# Função para excluir gastos
-def excluir_gastos(usuario):
-    # Criar a janela para excluir gastos
-    janela_excluir_gastos = Toplevel(janela)
-    janela_excluir_gastos.title("Excluir Gastos")
+    # Calcular a soma dos valores dos gastos
+    total_valor = sum([gasto[2] for gasto in gastos])
 
+    # Exibir a soma ao final da lista
+    label_soma = Label(janela_visualizar_gastos, text=f"Soma dos Gastos: {total_valor}")
+    label_soma.pack()
+
+# Função para abrir a janela de alterar gasto
+def abrir_janela_alterar_gasto(usuario):
     # Consultar gastos associados ao usuário
     cursor.execute("SELECT * FROM gastos WHERE cpf_cadastro = %s", (usuario[0],))
     gastos = cursor.fetchall()
+
+    # Verificar se há gastos para atualizar
+    if not gastos:
+        messagebox.showinfo("Nenhum Gasto", "Não há gastos para atualizar.")
+        return
+
+    janela_alterar_gasto = Toplevel(janela)
+    janela_alterar_gasto.title("Alterar Gasto")
+
+    # Exibir gastos na nova janela
+    for gasto in gastos:
+        label_gasto = Label(janela_alterar_gasto, text=f"ID: {gasto[0]}, Nome: {gasto[1]}, Valor: {gasto[2]}, Observação: {gasto[3]}")
+        label_gasto.pack()
+
+    # Criar campo de entrada para o ID do gasto a ser alterado
+    id_gasto_label = Label(janela_alterar_gasto, text="ID do Gasto a ser Alterado:")
+    id_gasto_label.pack(pady=10)
+    id_gasto_entry = Entry(janela_alterar_gasto)
+    id_gasto_entry.pack(pady=10)
+
+    # Verificar se o ID do gasto fornecido é válido
+    def validar_id_gasto():
+        id_gasto = int(id_gasto_entry.get())
+        if id_gasto not in [g[0] for g in gastos]:
+            messagebox.showerror("ID Inválido", "ID do gasto fornecido não é válido.")
+            return False
+        return True
+
+    # Criar campos de entrada para as novas informações do gasto
+    novo_nome_label = Label(janela_alterar_gasto, text="Novo Nome:")
+    novo_nome_label.pack(pady=10)
+    novo_nome_entry = Entry(janela_alterar_gasto)
+    novo_nome_entry.pack(pady=10)
+
+    novo_valor_label = Label(janela_alterar_gasto, text="Novo Valor:")
+    novo_valor_label.pack(pady=10)
+    novo_valor_entry = Entry(janela_alterar_gasto)
+    novo_valor_entry.pack(pady=10)
+
+    nova_observacao_label = Label(janela_alterar_gasto, text="Nova Observação:")
+    nova_observacao_label.pack(pady=10)
+    nova_observacao_entry = Entry(janela_alterar_gasto)
+    nova_observacao_entry.pack(pady=10)
+
+    # Função para alterar gasto pelo ID
+    def alterar_gasto():
+        if not validar_id_gasto():
+            return
+
+        id_gasto = int(id_gasto_entry.get())
+        novo_nome = novo_nome_entry.get()
+        novo_valor = float(novo_valor_entry.get())
+        nova_observacao = nova_observacao_entry.get()
+
+        # Alterar informações do gasto no banco de dados
+        cursor.execute("UPDATE gastos SET nome = %s, valor = %s, observacao = %s WHERE id_gasto = %s",
+                       (novo_nome, novo_valor, nova_observacao, id_gasto))
+        conexao.commit()
+
+        messagebox.showinfo("Gasto Alterado", "Gasto alterado com sucesso!")
+        janela_alterar_gasto.destroy()
+
+    # Criar botão para alterar gasto
+    alterar_gasto_button = Button(janela_alterar_gasto, text="Alterar Gasto", command=alterar_gasto)
+    alterar_gasto_button.pack(pady=10)
+
+# Função para excluir gastos
+def excluir_gastos(usuario):
+    # Consultar gastos associados ao usuário
+    cursor.execute("SELECT * FROM gastos WHERE cpf_cadastro = %s", (usuario[0],))
+    gastos = cursor.fetchall()
+
+    # Verificar se há gastos para excluir
+    if not gastos:
+        messagebox.showinfo("Nenhum Gasto", "Não há gastos para excluir.")
+        return
+
+    # Criar a janela para excluir gastos
+    janela_excluir_gastos = Toplevel(janela)
+    janela_excluir_gastos.title("Excluir Gastos")
 
     # Exibir gastos na nova janela
     for gasto in gastos:
@@ -182,8 +269,8 @@ def excluir_gastos(usuario):
     def excluir_gasto():
         id_gasto = int(id_gasto_entry.get())
 
-        # Excluir gasto no banco de dados
-        cursor.execute("DELETE FROM gastos WHERE id_gasto = %s", (id_gasto,))
+        # Excluir gasto no banco de dados, considerando o ID do usuário autenticado
+        cursor.execute("DELETE FROM gastos WHERE id_gasto = %s AND cpf_cadastro = %s", (id_gasto, usuario[0]))
         conexao.commit()
 
         messagebox.showinfo("Gasto Excluído", "Gasto excluído com sucesso!")
@@ -192,7 +279,6 @@ def excluir_gastos(usuario):
     # Criar botão para excluir gasto
     excluir_gasto_button = Button(janela_excluir_gastos, text="Excluir Gasto", command=excluir_gasto)
     excluir_gasto_button.pack(pady=10)
-
 
 # Criar a janela principal
 janela = Tk()
