@@ -267,10 +267,15 @@ def excluir_gastos(usuario):
 
     # Função para excluir gasto pelo ID
     def excluir_gasto():
-        id_gasto = int(id_gasto_entry.get())
+        id_gasto = id_gasto_entry.get()
+
+        # Verificar se o ID do gasto fornecido é válido
+        if not id_gasto.isdigit() or int(id_gasto) not in [g[0] for g in gastos]:
+            messagebox.showerror("ID Inválido", "ID do gasto fornecido não é válido.")
+            return
 
         # Excluir gasto no banco de dados, considerando o ID do usuário
-        cursor.execute("DELETE FROM gastos WHERE id_gasto = %s AND cpf_cadastro = %s", (id_gasto, usuario[0]))
+        cursor.execute("DELETE FROM gastos WHERE id_gasto = %s AND cpf_cadastro = %s", (int(id_gasto), usuario[0]))
         conexao.commit()
 
         messagebox.showinfo("Gasto Excluído", "Gasto excluído com sucesso!")
